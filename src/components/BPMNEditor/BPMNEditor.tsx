@@ -253,17 +253,17 @@ const BPMNEditor = forwardRef<BPMNEditorRef, BPMNEditorProps>((props, ref) => {
     if (!modelerRef.current) return;
 
     try {
-      const silentModeling = modelerRef.current.get('silentModeling') as SilentModeling;
+      const silentModeling = (modelerRef.current as any).get('silentModeling') as SilentModeling;
       
       switch (changeEvent.type) {
         case 'update':
-          const element = modelerRef.current.get('elementRegistry').get(changeEvent.elementId);
+          const element = (modelerRef.current as any).get('elementRegistry').get(changeEvent.elementId);
           if (element && changeEvent.elementData.businessObject) {
             silentModeling.updatePropertiesSilently(element, changeEvent.elementData.businessObject);
           }
           break;
         case 'move':
-          const moveElement = modelerRef.current.get('elementRegistry').get(changeEvent.elementId);
+          const moveElement = (modelerRef.current as any).get('elementRegistry').get(changeEvent.elementId);
           if (moveElement && changeEvent.elementData.x !== undefined && changeEvent.elementData.y !== undefined) {
             const delta = {
               x: changeEvent.elementData.x - moveElement.x,
@@ -281,7 +281,7 @@ const BPMNEditor = forwardRef<BPMNEditorRef, BPMNEditorProps>((props, ref) => {
           }
           break;
         case 'delete':
-          const deleteElement = modelerRef.current.get('elementRegistry').get(changeEvent.elementId);
+          const deleteElement = (modelerRef.current as any).get('elementRegistry').get(changeEvent.elementId);
           if (deleteElement) {
             silentModeling.removeElementSilently(deleteElement);
           }
@@ -296,9 +296,9 @@ const BPMNEditor = forwardRef<BPMNEditorRef, BPMNEditorProps>((props, ref) => {
     if (!modelerRef.current) return;
 
     try {
-      const silentModeling = modelerRef.current.get('silentModeling') as SilentModeling;
-      const updates = changeEvents.map(event => {
-        const element = modelerRef.current!.get('elementRegistry').get(event.elementId);
+      const silentModeling = (modelerRef.current as any).get('silentModeling') as SilentModeling;
+      const updates = changeEvents.map((event) => {
+        const element = (modelerRef.current as any).get('elementRegistry').get(event.elementId);
         return {
           type: event.type as 'update' | 'move' | 'create' | 'remove',
           element: element,
@@ -314,12 +314,12 @@ const BPMNEditor = forwardRef<BPMNEditorRef, BPMNEditorProps>((props, ref) => {
 
   const getSilentCommandStack = (): SilentCommandStack | null => {
     if (!modelerRef.current) return null;
-    return modelerRef.current.get('silentCommandStack') as SilentCommandStack;
+    return (modelerRef.current as any).get('silentCommandStack') as SilentCommandStack;
   };
 
   const getSilentModeling = (): SilentModeling | null => {
     if (!modelerRef.current) return null;
-    return modelerRef.current.get('silentModeling') as SilentModeling;
+    return (modelerRef.current as any).get('silentModeling') as SilentModeling;
   };
 
   // Expose methods to parent component

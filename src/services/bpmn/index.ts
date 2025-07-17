@@ -1,6 +1,7 @@
 // Silent CommandStack 및 Modeling 모듈 통합 export
 export { SilentCommandStack, SilentCommandStackModule } from './SilentCommandStackModule';
 export { SilentModeling, SilentModelingModule } from './SilentModeling';
+export { SilentUpdateService, SilentUpdateServiceModule, SilentUpdateOperation } from './SilentUpdateService';
 
 // 통합 모듈 정의
 export const SilentCollaborationModule = {
@@ -8,7 +9,8 @@ export const SilentCollaborationModule = {
     require('diagram-js/lib/core').default,
     require('bpmn-js/lib/features/rules').default
   ],
-  __init__: ['silentCommandStack', 'silentModeling'],
+  __init__: ['silentCommandStack', 'silentModeling', 'silentUpdateService'],
   silentCommandStack: ['type', require('./SilentCommandStackModule').SilentCommandStack],
-  silentModeling: ['type', require('./SilentModeling').SilentModeling]
+  silentModeling: ['type', require('./SilentModeling').SilentModeling],
+  silentUpdateService: ['type', require('./SilentUpdateService').SilentUpdateService]
 };

@@ -80,6 +80,42 @@ export interface SilentModeling {
   }>): void;
 }
 
+// Silent Update Service 타입 정의
+export interface SilentUpdateService {
+  updateBusinessObjectDirectly(elementId: string, properties: any): any | null;
+  setBusinessObjectProperty(elementId: string, propertyPath: string, value: any): boolean;
+  setBusinessObjectParent(elementId: string, parentElementId: string): boolean;
+  addElementSilently(elementData: any, parent?: any): any;
+  removeElementSilently(elementId: string): boolean;
+  addConnectionSilently(connectionData: any, sourceId: string, targetId: string): any;
+  updateVisualPropertiesDirectly(elementId: string, visualProps: any): any | null;
+  setElementPosition(elementId: string, x: number, y: number): boolean;
+  setElementSize(elementId: string, width: number, height: number): boolean;
+  refreshElementGraphics(elementId: string): boolean;
+  refreshAllGraphics(): void;
+  suspendRendering(): void;
+  resumeRendering(): void;
+  isRenderingSuspended(): boolean;
+  batchUpdate(updates: SilentUpdateOperation[]): void;
+  batchUpdateOptimized(updates: SilentUpdateOperation[]): void;
+  batchUpdateLarge(updates: SilentUpdateOperation[], chunkSize?: number): Promise<void>;
+  elementExists(elementId: string): boolean;
+  getAllElementIds(): string[];
+  getElementCountByType(): { [type: string]: number };
+  cleanup(): void;
+  getServiceInfo(): {
+    elementCount: number;
+    isRenderingSuspended: boolean;
+    elementTypes: { [type: string]: number };
+  };
+}
+
+export interface SilentUpdateOperation {
+  type: 'business' | 'visual' | 'create' | 'remove';
+  elementId?: string;
+  data?: any;
+}
+
 export interface DiagramData {
   id: string;
   name: string;

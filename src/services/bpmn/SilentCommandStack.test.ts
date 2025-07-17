@@ -1,5 +1,5 @@
 import { SilentCommandStack } from './SilentCommandStackModule';
-import { EventBus } from 'diagram-js/lib/core';
+import EventBus from 'diagram-js/lib/core';
 
 // Mock EventBus
 class MockEventBus {
