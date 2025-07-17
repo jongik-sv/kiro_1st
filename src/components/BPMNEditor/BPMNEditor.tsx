@@ -13,11 +13,11 @@ import {
   Canvas,
   EventBus,
 } from '../../types/bpmn';
-import { 
-  SilentCommandStackModule, 
+import {
+  SilentCommandStackModule,
   SilentModelingModule,
   SilentCommandStack,
-  SilentModeling 
+  SilentModeling,
 } from '../../services/bpmn';
 
 // Import bpmn-js CSS
@@ -62,10 +62,7 @@ const BPMNEditor = forwardRef<BPMNEditorRef, BPMNEditorProps>((props, ref) => {
       keyboard: {
         bindTo: window,
       },
-      additionalModules: [
-        SilentCommandStackModule,
-        SilentModelingModule
-      ]
+      additionalModules: [SilentCommandStackModule, SilentModelingModule],
     });
 
     modelerRef.current = modeler;
@@ -253,35 +250,50 @@ const BPMNEditor = forwardRef<BPMNEditorRef, BPMNEditorProps>((props, ref) => {
     if (!modelerRef.current) return;
 
     try {
-      const silentModeling = (modelerRef.current as any).get('silentModeling') as SilentModeling;
-      
+      const silentModeling = (modelerRef.current as any).get(
+        'silentModeling'
+      ) as SilentModeling;
+
       switch (changeEvent.type) {
         case 'update':
-          const element = (modelerRef.current as any).get('elementRegistry').get(changeEvent.elementId);
+          const element = (modelerRef.current as any)
+            .get('elementRegistry')
+            .get(changeEvent.elementId);
           if (element && changeEvent.elementData.businessObject) {
-            silentModeling.updatePropertiesSilently(element, changeEvent.elementData.businessObject);
+            silentModeling.updatePropertiesSilently(
+              element,
+              changeEvent.elementData.businessObject
+            );
           }
           break;
         case 'move':
-          const moveElement = (modelerRef.current as any).get('elementRegistry').get(changeEvent.elementId);
-          if (moveElement && changeEvent.elementData.x !== undefined && changeEvent.elementData.y !== undefined) {
+          const moveElement = (modelerRef.current as any)
+            .get('elementRegistry')
+            .get(changeEvent.elementId);
+          if (
+            moveElement &&
+            changeEvent.elementData.x !== undefined &&
+            changeEvent.elementData.y !== undefined
+          ) {
             const delta = {
               x: changeEvent.elementData.x - moveElement.x,
-              y: changeEvent.elementData.y - moveElement.y
+              y: changeEvent.elementData.y - moveElement.y,
             };
             silentModeling.moveElementSilently(moveElement, delta);
           }
           break;
         case 'create':
           if (changeEvent.elementData) {
-            silentModeling.createElementSilently(
-              changeEvent.elementData,
-              { x: changeEvent.elementData.x || 0, y: changeEvent.elementData.y || 0 }
-            );
+            silentModeling.createElementSilently(changeEvent.elementData, {
+              x: changeEvent.elementData.x || 0,
+              y: changeEvent.elementData.y || 0,
+            });
           }
           break;
         case 'delete':
-          const deleteElement = (modelerRef.current as any).get('elementRegistry').get(changeEvent.elementId);
+          const deleteElement = (modelerRef.current as any)
+            .get('elementRegistry')
+            .get(changeEvent.elementId);
           if (deleteElement) {
             silentModeling.removeElementSilently(deleteElement);
           }
@@ -296,13 +308,17 @@ const BPMNEditor = forwardRef<BPMNEditorRef, BPMNEditorProps>((props, ref) => {
     if (!modelerRef.current) return;
 
     try {
-      const silentModeling = (modelerRef.current as any).get('silentModeling') as SilentModeling;
-      const updates = changeEvents.map((event) => {
-        const element = (modelerRef.current as any).get('elementRegistry').get(event.elementId);
+      const silentModeling = (modelerRef.current as any).get(
+        'silentModeling'
+      ) as SilentModeling;
+      const updates = changeEvents.map(event => {
+        const element = (modelerRef.current as any)
+          .get('elementRegistry')
+          .get(event.elementId);
         return {
           type: event.type as 'update' | 'move' | 'create' | 'remove',
           element: element,
-          data: event.elementData
+          data: event.elementData,
         };
       });
 
@@ -314,7 +330,9 @@ const BPMNEditor = forwardRef<BPMNEditorRef, BPMNEditorProps>((props, ref) => {
 
   const getSilentCommandStack = (): SilentCommandStack | null => {
     if (!modelerRef.current) return null;
-    return (modelerRef.current as any).get('silentCommandStack') as SilentCommandStack;
+    return (modelerRef.current as any).get(
+      'silentCommandStack'
+    ) as SilentCommandStack;
   };
 
   const getSilentModeling = (): SilentModeling | null => {

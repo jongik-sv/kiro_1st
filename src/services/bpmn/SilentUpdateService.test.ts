@@ -2,7 +2,10 @@
  * SilentUpdateService 단위 테스트
  */
 
-import { SilentUpdateService, SilentUpdateOperation } from './SilentUpdateService';
+import {
+  SilentUpdateService,
+  SilentUpdateOperation,
+} from './SilentUpdateService';
 
 // Mock 객체들
 const mockCanvas = {
@@ -11,55 +14,61 @@ const mockCanvas = {
   _addElement: jest.fn(),
   _removeElement: jest.fn(),
   _suspendRendering: false,
-  _redraw: jest.fn()
+  _redraw: jest.fn(),
 };
 
 const mockElementRegistry = {
   get: jest.fn(),
   getGraphics: jest.fn(),
-  _elements: {}
+  _elements: {},
 };
 
 const mockGraphicsFactory = {
   create: jest.fn(() => ({ id: 'mock-gfx' })),
-  update: jest.fn()
+  update: jest.fn(),
 };
 
 const mockBpmnFactory = {
-  create: jest.fn((type, attrs) => ({ $type: type, ...attrs }))
+  create: jest.fn((type, attrs) => ({ $type: type, ...attrs })),
 };
 
 const mockElementFactory = {
-  createShape: jest.fn((attrs) => ({
+  createShape: jest.fn(attrs => ({
     id: attrs.id || 'test-element',
     type: attrs.type,
     businessObject: attrs.businessObject,
     x: attrs.x || 0,
     y: attrs.y || 0,
     width: attrs.width || 100,
-    height: attrs.height || 80
+    height: attrs.height || 80,
   })),
-  createConnection: jest.fn((attrs) => ({
+  createConnection: jest.fn(attrs => ({
     id: attrs.id || 'test-connection',
     type: attrs.type,
     businessObject: attrs.businessObject,
     source: attrs.source,
     target: attrs.target,
-    waypoints: attrs.waypoints || []
-  }))
+    waypoints: attrs.waypoints || [],
+  })),
 };
 
 const mockModeler = {
   get: jest.fn((service: string) => {
     switch (service) {
-      case 'canvas': return mockCanvas;
-      case 'elementRegistry': return mockElementRegistry;
-      case 'graphicsFactory': return mockGraphicsFactory;
-      case 'bpmnFactory': return mockBpmnFactory;
-      case 'elementFactory': return mockElementFactory;
-      default: return null;
+      case 'canvas':
+        return mockCanvas;
+      case 'elementRegistry':
+        return mockElementRegistry;
+      case 'graphicsFactory':
+        return mockGraphicsFactory;
+      case 'bpmnFactory':
+        return mockBpmnFactory;
+      case 'elementFactory':
+        return mockElementFactory;
+      default:
+        return null;
     }
-  })
+  }),
 };
 
 describe('SilentUpdateService', () => {
@@ -70,7 +79,7 @@ describe('SilentUpdateService', () => {
     jest.clearAllMocks();
     mockElementRegistry._elements = {};
     mockCanvas._suspendRendering = false;
-    
+
     // SilentUpdateService의 private 속성들을 직접 설정
     service = new SilentUpdateService(mockModeler as any);
     (service as any).canvas = mockCanvas;
@@ -85,18 +94,24 @@ describe('SilentUpdateService', () => {
       // Arrange
       const mockElement = {
         id: 'test-element',
-        businessObject: { $type: 'bpmn:Task', name: 'Old Name' }
+        businessObject: { $type: 'bpmn:Task', name: 'Old Name' },
       };
       mockElementRegistry.get.mockReturnValue(mockElement);
       mockElementRegistry.getGraphics.mockReturnValue({ id: 'mock-gfx' });
 
       // Act
-      const result = service.updateBusinessObjectDirectly('test-element', { name: 'New Name' });
+      const result = service.updateBusinessObjectDirectly('test-element', {
+        name: 'New Name',
+      });
 
       // Assert
       expect(result).toBe(mockElement);
       expect(mockElement.businessObject.name).toBe('New Name');
-      expect(mockGraphicsFactory.update).toHaveBeenCalledWith('shape', mockElement, { id: 'mock-gfx' });
+      expect(mockGraphicsFactory.update).toHaveBeenCalledWith(
+        'shape',
+        mockElement,
+        { id: 'mock-gfx' }
+      );
     });
 
     test('updateBusinessObjectDirectly - 요소가 존재하지 않는 경우', () => {
@@ -104,7 +119,9 @@ describe('SilentUpdateService', () => {
       mockElementRegistry.get.mockReturnValue(null);
 
       // Act
-      const result = service.updateBusinessObjectDirectly('non-existent', { name: 'Test' });
+      const result = service.updateBusinessObjectDirectly('non-existent', {
+        name: 'Test',
+      });
 
       // Assert
       expect(result).toBeNull();
@@ -115,17 +132,23 @@ describe('SilentUpdateService', () => {
       // Arrange
       const mockElement = {
         id: 'test-element',
-        businessObject: { $type: 'bpmn:Task' }
+        businessObject: { $type: 'bpmn:Task' },
       };
       mockElementRegistry.get.mockReturnValue(mockElement);
       mockElementRegistry.getGraphics.mockReturnValue({ id: 'mock-gfx' });
 
       // Act
-      const result = service.setBusinessObjectProperty('test-element', 'documentation.text', 'Test Documentation');
+      const result = service.setBusinessObjectProperty(
+        'test-element',
+        'documentation.text',
+        'Test Documentation'
+      );
 
       // Assert
       expect(result).toBe(true);
-      expect(mockElement.businessObject.documentation.text).toBe('Test Documentation');
+      expect(mockElement.businessObject.documentation.text).toBe(
+        'Test Documentation'
+      );
     });
   });
 
@@ -137,17 +160,22 @@ describe('SilentUpdateService', () => {
         type: 'bpmn:Task',
         x: 100,
         y: 200,
-        properties: { name: 'New Task' }
+        properties: { name: 'New Task' },
       };
 
       // Act
       const result = service.addElementSilently(elementData);
 
       // Assert
-      expect(mockBpmnFactory.create).toHaveBeenCalledWith('bpmn:Task', { name: 'New Task' });
+      expect(mockBpmnFactory.create).toHaveBeenCalledWith('bpmn:Task', {
+        name: 'New Task',
+      });
       expect(mockElementFactory.createShape).toHaveBeenCalled();
       expect(mockCanvas._addElement).toHaveBeenCalled();
-      expect(mockGraphicsFactory.create).toHaveBeenCalledWith('shape', expect.any(Object));
+      expect(mockGraphicsFactory.create).toHaveBeenCalledWith(
+        'shape',
+        expect.any(Object)
+      );
       expect(result.id).toBe('new-element');
     });
 
@@ -156,10 +184,13 @@ describe('SilentUpdateService', () => {
       const mockElement = {
         id: 'test-element',
         incoming: [],
-        outgoing: []
+        outgoing: [],
       };
       mockElementRegistry.get.mockReturnValue(mockElement);
-      mockElementRegistry._elements['test-element'] = { element: mockElement, gfx: {} };
+      mockElementRegistry._elements['test-element'] = {
+        element: mockElement,
+        gfx: {},
+      };
 
       // Act
       const result = service.removeElementSilently('test-element');
@@ -174,15 +205,21 @@ describe('SilentUpdateService', () => {
       // Arrange
       const sourceElement = {
         id: 'source',
-        x: 100, y: 100, width: 100, height: 80,
+        x: 100,
+        y: 100,
+        width: 100,
+        height: 80,
         businessObject: { $type: 'bpmn:Task' },
-        outgoing: []
+        outgoing: [],
       };
       const targetElement = {
         id: 'target',
-        x: 300, y: 100, width: 100, height: 80,
+        x: 300,
+        y: 100,
+        width: 100,
+        height: 80,
         businessObject: { $type: 'bpmn:Task' },
-        incoming: []
+        incoming: [],
       };
 
       mockElementRegistry.get
@@ -192,15 +229,21 @@ describe('SilentUpdateService', () => {
       const connectionData = {
         id: 'test-connection',
         type: 'bpmn:SequenceFlow',
-        properties: { name: 'Flow' }
+        properties: { name: 'Flow' },
       };
 
       // Act
-      const result = service.addConnectionSilently(connectionData, 'source', 'target');
+      const result = service.addConnectionSilently(
+        connectionData,
+        'source',
+        'target'
+      );
 
       // Assert
       expect(result).toBeTruthy();
-      expect(mockBpmnFactory.create).toHaveBeenCalledWith('bpmn:SequenceFlow', { name: 'Flow' });
+      expect(mockBpmnFactory.create).toHaveBeenCalledWith('bpmn:SequenceFlow', {
+        name: 'Flow',
+      });
       expect(mockElementFactory.createConnection).toHaveBeenCalled();
       expect(sourceElement.outgoing).toContain(result);
       expect(targetElement.incoming).toContain(result);
@@ -212,14 +255,20 @@ describe('SilentUpdateService', () => {
       // Arrange
       const mockElement = {
         id: 'test-element',
-        x: 100, y: 100, width: 100, height: 80
+        x: 100,
+        y: 100,
+        width: 100,
+        height: 80,
       };
       mockElementRegistry.get.mockReturnValue(mockElement);
       mockElementRegistry.getGraphics.mockReturnValue({ id: 'mock-gfx' });
 
       // Act
       const result = service.updateVisualPropertiesDirectly('test-element', {
-        x: 200, y: 150, width: 120, height: 90
+        x: 200,
+        y: 150,
+        width: 120,
+        height: 90,
       });
 
       // Assert
@@ -285,7 +334,7 @@ describe('SilentUpdateService', () => {
       // Arrange
       const mockElement = {
         id: 'test-element',
-        businessObject: { $type: 'bpmn:Task', name: 'Old' }
+        businessObject: { $type: 'bpmn:Task', name: 'Old' },
       };
       mockElementRegistry.get.mockReturnValue(mockElement);
       mockElementRegistry.getGraphics.mockReturnValue({ id: 'mock-gfx' });
@@ -294,13 +343,13 @@ describe('SilentUpdateService', () => {
         {
           type: 'business',
           elementId: 'test-element',
-          data: { name: 'Updated Name' }
+          data: { name: 'Updated Name' },
         },
         {
           type: 'visual',
           elementId: 'test-element',
-          data: { x: 200, y: 300 }
-        }
+          data: { x: 200, y: 300 },
+        },
       ];
 
       // Act
@@ -317,12 +366,12 @@ describe('SilentUpdateService', () => {
       const updates: SilentUpdateOperation[] = [
         { type: 'create', data: { type: 'bpmn:Task', x: 100, y: 100 } },
         { type: 'business', elementId: 'element1', data: { name: 'Test' } },
-        { type: 'remove', elementId: 'element2' }
+        { type: 'remove', elementId: 'element2' },
       ];
 
       const mockElement = { id: 'element1', businessObject: {} };
       const mockElement2 = { id: 'element2', incoming: [], outgoing: [] };
-      
+
       mockElementRegistry.get
         .mockReturnValueOnce(mockElement)
         .mockReturnValueOnce(mockElement2);
@@ -341,7 +390,9 @@ describe('SilentUpdateService', () => {
   describe('유틸리티 메서드', () => {
     test('elementExists - 요소 존재 확인', () => {
       // Arrange
-      mockElementRegistry.get.mockReturnValueOnce({ id: 'existing' }).mockReturnValueOnce(undefined);
+      mockElementRegistry.get
+        .mockReturnValueOnce({ id: 'existing' })
+        .mockReturnValueOnce(undefined);
 
       // Act & Assert
       expect(service.elementExists('existing')).toBe(true);
@@ -351,8 +402,8 @@ describe('SilentUpdateService', () => {
     test('getAllElementIds - 모든 요소 ID 반환', () => {
       // Arrange
       mockElementRegistry._elements = {
-        'element1': { element: {}, gfx: {} },
-        'element2': { element: {}, gfx: {} }
+        element1: { element: {}, gfx: {} },
+        element2: { element: {}, gfx: {} },
       };
 
       // Act
@@ -365,9 +416,12 @@ describe('SilentUpdateService', () => {
     test('getElementCountByType - 타입별 개수 반환', () => {
       // Arrange
       mockElementRegistry._elements = {
-        'task1': { element: { businessObject: { $type: 'bpmn:Task' } }, gfx: {} },
-        'task2': { element: { businessObject: { $type: 'bpmn:Task' } }, gfx: {} },
-        'gateway1': { element: { businessObject: { $type: 'bpmn:Gateway' } }, gfx: {} }
+        task1: { element: { businessObject: { $type: 'bpmn:Task' } }, gfx: {} },
+        task2: { element: { businessObject: { $type: 'bpmn:Task' } }, gfx: {} },
+        gateway1: {
+          element: { businessObject: { $type: 'bpmn:Gateway' } },
+          gfx: {},
+        },
       };
 
       // Act
@@ -376,14 +430,17 @@ describe('SilentUpdateService', () => {
       // Assert
       expect(counts).toEqual({
         'bpmn:Task': 2,
-        'bpmn:Gateway': 1
+        'bpmn:Gateway': 1,
       });
     });
 
     test('getServiceInfo - 서비스 상태 정보 반환', () => {
       // Arrange
       mockElementRegistry._elements = {
-        'element1': { element: { businessObject: { $type: 'bpmn:Task' } }, gfx: {} }
+        element1: {
+          element: { businessObject: { $type: 'bpmn:Task' } },
+          gfx: {},
+        },
       };
       mockCanvas._suspendRendering = true;
 
@@ -394,7 +451,7 @@ describe('SilentUpdateService', () => {
       expect(info).toEqual({
         elementCount: 1,
         isRenderingSuspended: true,
-        elementTypes: { 'bpmn:Task': 1 }
+        elementTypes: { 'bpmn:Task': 1 },
       });
     });
   });

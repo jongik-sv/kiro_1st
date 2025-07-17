@@ -1,7 +1,7 @@
 /**
  * SilentUpdateService - 핵심 협업 메커니즘
- * 
- * bpmn-js 협업 시스템의 핵심으로, 원격 변경사항을 로컬 모델에 반영하되 
+ *
+ * bpmn-js 협업 시스템의 핵심으로, 원격 변경사항을 로컬 모델에 반영하되
  * commandStack이나 element 이벤트를 발생시키지 않는 "Silent Update" 메커니즘을 제공합니다.
  */
 
@@ -18,7 +18,7 @@ interface Canvas {
 interface ElementRegistry {
   get(id: string): any;
   getGraphics(element: any): any;
-  _elements: { [key: string]: { element: any, gfx: any } };
+  _elements: { [key: string]: { element: any; gfx: any } };
 }
 
 interface GraphicsFactory {
@@ -50,7 +50,7 @@ export interface SilentUpdateOperation {
 
 /**
  * SilentUpdateService 클래스
- * 
+ *
  * bpmn-js의 내부 구조를 직접 조작하여 이벤트 없이 모델을 업데이트하는 서비스
  */
 export class SilentUpdateService {
@@ -74,7 +74,7 @@ export class SilentUpdateService {
 
   /**
    * BusinessObject 직접 업데이트 (이벤트 없음)
-   * 
+   *
    * @param elementId 업데이트할 요소의 ID
    * @param properties 업데이트할 속성들
    * @returns 업데이트된 요소 또는 null
@@ -82,7 +82,9 @@ export class SilentUpdateService {
   updateBusinessObjectDirectly(elementId: string, properties: any): any | null {
     const element = this.elementRegistry.get(elementId);
     if (!element || !element.businessObject) {
-      console.warn(`Element with ID ${elementId} not found or has no businessObject`);
+      console.warn(
+        `Element with ID ${elementId} not found or has no businessObject`
+      );
       return null;
     }
 
@@ -97,12 +99,16 @@ export class SilentUpdateService {
 
   /**
    * BusinessObject 속성 직접 설정
-   * 
+   *
    * @param elementId 요소 ID
    * @param propertyPath 속성 경로 (예: 'name', 'documentation[0].text')
    * @param value 설정할 값
    */
-  setBusinessObjectProperty(elementId: string, propertyPath: string, value: any): boolean {
+  setBusinessObjectProperty(
+    elementId: string,
+    propertyPath: string,
+    value: any
+  ): boolean {
     const element = this.elementRegistry.get(elementId);
     if (!element || !element.businessObject) {
       return false;
@@ -129,7 +135,7 @@ export class SilentUpdateService {
 
   /**
    * BusinessObject 트리 구조 직접 설정
-   * 
+   *
    * @param elementId 요소 ID
    * @param parentElementId 부모 요소 ID
    */
@@ -137,7 +143,12 @@ export class SilentUpdateService {
     const element = this.elementRegistry.get(elementId);
     const parentElement = this.elementRegistry.get(parentElementId);
 
-    if (!element || !parentElement || !element.businessObject || !parentElement.businessObject) {
+    if (
+      !element ||
+      !parentElement ||
+      !element.businessObject ||
+      !parentElement.businessObject
+    ) {
       return false;
     }
 
@@ -146,7 +157,11 @@ export class SilentUpdateService {
 
     // 부모의 children 배열에 추가 (존재하는 경우)
     if (parentElement.businessObject.flowElements) {
-      if (!parentElement.businessObject.flowElements.includes(element.businessObject)) {
+      if (
+        !parentElement.businessObject.flowElements.includes(
+          element.businessObject
+        )
+      ) {
         parentElement.businessObject.flowElements.push(element.businessObject);
       }
     }
@@ -158,14 +173,17 @@ export class SilentUpdateService {
 
   /**
    * Canvas에 직접 요소 추가 (이벤트 없음)
-   * 
+   *
    * @param elementData 요소 데이터
    * @param parent 부모 요소 (선택사항)
    * @returns 생성된 요소
    */
   addElementSilently(elementData: any, parent?: any): any {
     // BusinessObject 생성
-    const businessObject = this.bpmnFactory.create(elementData.type, elementData.properties || {});
+    const businessObject = this.bpmnFactory.create(
+      elementData.type,
+      elementData.properties || {}
+    );
 
     // 요소 생성
     const element = this.elementFactory.createShape({
@@ -174,7 +192,7 @@ export class SilentUpdateService {
       x: elementData.x || 0,
       y: elementData.y || 0,
       width: elementData.width || 100,
-      height: elementData.height || 80
+      height: elementData.height || 80,
     });
 
     // ID 설정
@@ -191,7 +209,7 @@ export class SilentUpdateService {
     const gfx = this.graphicsFactory.create('shape', element);
     (this.elementRegistry as any)._elements[element.id] = {
       element: element,
-      gfx: gfx
+      gfx: gfx,
     };
 
     return element;
@@ -199,7 +217,7 @@ export class SilentUpdateService {
 
   /**
    * Canvas에서 직접 요소 제거 (이벤트 없음)
-   * 
+   *
    * @param elementId 제거할 요소의 ID
    */
   removeElementSilently(elementId: string): boolean {
@@ -210,7 +228,10 @@ export class SilentUpdateService {
     }
 
     // 연결된 요소들도 함께 제거 (incoming/outgoing connections)
-    const connections = [...(element.incoming || []), ...(element.outgoing || [])];
+    const connections = [
+      ...(element.incoming || []),
+      ...(element.outgoing || []),
+    ];
     connections.forEach(connection => {
       if (connection.id !== elementId) {
         this.removeElementSilently(connection.id);
@@ -228,23 +249,32 @@ export class SilentUpdateService {
 
   /**
    * 연결 요소를 직접 생성
-   * 
+   *
    * @param connectionData 연결 데이터
    * @param sourceId 소스 요소 ID
    * @param targetId 타겟 요소 ID
    * @returns 생성된 연결 요소
    */
-  addConnectionSilently(connectionData: any, sourceId: string, targetId: string): any {
+  addConnectionSilently(
+    connectionData: any,
+    sourceId: string,
+    targetId: string
+  ): any {
     const source = this.elementRegistry.get(sourceId);
     const target = this.elementRegistry.get(targetId);
 
     if (!source || !target) {
-      console.warn(`Source (${sourceId}) or target (${targetId}) element not found`);
+      console.warn(
+        `Source (${sourceId}) or target (${targetId}) element not found`
+      );
       return null;
     }
 
     // BusinessObject 생성
-    const businessObject = this.bpmnFactory.create(connectionData.type, connectionData.properties || {});
+    const businessObject = this.bpmnFactory.create(
+      connectionData.type,
+      connectionData.properties || {}
+    );
 
     // 연결 요소 생성
     const connection = this.elementFactory.createConnection({
@@ -254,8 +284,8 @@ export class SilentUpdateService {
       target: target,
       waypoints: connectionData.waypoints || [
         { x: source.x + source.width / 2, y: source.y + source.height / 2 },
-        { x: target.x + target.width / 2, y: target.y + target.height / 2 }
-      ]
+        { x: target.x + target.width / 2, y: target.y + target.height / 2 },
+      ],
     });
 
     // ID 설정
@@ -275,13 +305,13 @@ export class SilentUpdateService {
     const gfx = this.graphicsFactory.create('connection', connection);
     (this.elementRegistry as any)._elements[connection.id] = {
       element: connection,
-      gfx: gfx
+      gfx: gfx,
     };
 
     // 소스와 타겟 요소의 연결 정보 업데이트
     if (!source.outgoing) source.outgoing = [];
     if (!target.incoming) target.incoming = [];
-    
+
     source.outgoing.push(connection);
     target.incoming.push(connection);
 
@@ -292,12 +322,15 @@ export class SilentUpdateService {
 
   /**
    * 시각적 속성 직접 업데이트
-   * 
+   *
    * @param elementId 요소 ID
    * @param visualProps 시각적 속성들 (x, y, width, height 등)
    * @returns 업데이트된 요소 또는 null
    */
-  updateVisualPropertiesDirectly(elementId: string, visualProps: any): any | null {
+  updateVisualPropertiesDirectly(
+    elementId: string,
+    visualProps: any
+  ): any | null {
     const element = this.elementRegistry.get(elementId);
     if (!element) {
       console.warn(`Element with ID ${elementId} not found`);
@@ -315,7 +348,7 @@ export class SilentUpdateService {
 
   /**
    * 요소 위치 직접 설정
-   * 
+   *
    * @param elementId 요소 ID
    * @param x X 좌표
    * @param y Y 좌표
@@ -326,20 +359,22 @@ export class SilentUpdateService {
 
   /**
    * 요소 크기 직접 설정
-   * 
+   *
    * @param elementId 요소 ID
    * @param width 너비
    * @param height 높이
    */
   setElementSize(elementId: string, width: number, height: number): boolean {
-    return this.updateVisualPropertiesDirectly(elementId, { width, height }) !== null;
+    return (
+      this.updateVisualPropertiesDirectly(elementId, { width, height }) !== null
+    );
   }
 
   // ==================== 그래픽스 강제 업데이트 및 렌더링 제어 ====================
 
   /**
    * 그래픽스 강제 업데이트 (이벤트 없음)
-   * 
+   *
    * @param element 업데이트할 요소
    */
   private updateGraphicsSilently(element: any): void {
@@ -352,7 +387,7 @@ export class SilentUpdateService {
 
   /**
    * 특정 요소의 그래픽스 강제 새로고침
-   * 
+   *
    * @param elementId 요소 ID
    */
   refreshElementGraphics(elementId: string): boolean {
@@ -396,12 +431,12 @@ export class SilentUpdateService {
   isRenderingSuspended(): boolean {
     return (this.canvas as any)._suspendRendering === true;
   }
- 
- // ==================== 배치 업데이트 시스템 (성능 최적화) ====================
+
+  // ==================== 배치 업데이트 시스템 (성능 최적화) ====================
 
   /**
    * 배치 업데이트 실행 (렌더링 최적화)
-   * 
+   *
    * @param updates 업데이트 작업 배열
    */
   batchUpdate(updates: SilentUpdateOperation[]): void {
@@ -423,15 +458,26 @@ export class SilentUpdateService {
 
           case 'visual':
             if (update.elementId && update.data) {
-              this.updateVisualPropertiesDirectly(update.elementId, update.data);
+              this.updateVisualPropertiesDirectly(
+                update.elementId,
+                update.data
+              );
             }
             break;
 
           case 'create':
             if (update.data) {
-              if (update.data.connectionData && update.data.sourceId && update.data.targetId) {
+              if (
+                update.data.connectionData &&
+                update.data.sourceId &&
+                update.data.targetId
+              ) {
                 // 연결 생성
-                this.addConnectionSilently(update.data.connectionData, update.data.sourceId, update.data.targetId);
+                this.addConnectionSilently(
+                  update.data.connectionData,
+                  update.data.sourceId,
+                  update.data.targetId
+                );
               } else {
                 // 일반 요소 생성
                 this.addElementSilently(update.data, update.data.parent);
@@ -457,7 +503,7 @@ export class SilentUpdateService {
 
   /**
    * 배치 업데이트 (타입별 그룹화로 성능 최적화)
-   * 
+   *
    * @param updates 업데이트 작업 배열
    */
   batchUpdateOptimized(updates: SilentUpdateOperation[]): void {
@@ -470,7 +516,7 @@ export class SilentUpdateService {
       business: updates.filter(u => u.type === 'business'),
       visual: updates.filter(u => u.type === 'visual'),
       create: updates.filter(u => u.type === 'create'),
-      remove: updates.filter(u => u.type === 'remove')
+      remove: updates.filter(u => u.type === 'remove'),
     };
 
     this.suspendRendering();
@@ -479,8 +525,16 @@ export class SilentUpdateService {
       // 1. 먼저 생성 작업 수행
       groupedUpdates.create.forEach(update => {
         if (update.data) {
-          if (update.data.connectionData && update.data.sourceId && update.data.targetId) {
-            this.addConnectionSilently(update.data.connectionData, update.data.sourceId, update.data.targetId);
+          if (
+            update.data.connectionData &&
+            update.data.sourceId &&
+            update.data.targetId
+          ) {
+            this.addConnectionSilently(
+              update.data.connectionData,
+              update.data.sourceId,
+              update.data.targetId
+            );
           } else {
             this.addElementSilently(update.data, update.data.parent);
           }
@@ -507,7 +561,6 @@ export class SilentUpdateService {
           this.removeElementSilently(update.elementId);
         }
       });
-
     } finally {
       this.resumeRendering();
     }
@@ -515,11 +568,14 @@ export class SilentUpdateService {
 
   /**
    * 대용량 배치 업데이트 (청크 단위로 처리)
-   * 
+   *
    * @param updates 업데이트 작업 배열
    * @param chunkSize 청크 크기 (기본값: 50)
    */
-  async batchUpdateLarge(updates: SilentUpdateOperation[], chunkSize: number = 50): Promise<void> {
+  async batchUpdateLarge(
+    updates: SilentUpdateOperation[],
+    chunkSize: number = 50
+  ): Promise<void> {
     if (updates.length === 0) {
       return;
     }
@@ -533,7 +589,7 @@ export class SilentUpdateService {
     // 각 청크를 순차적으로 처리 (메모리 사용량 제한)
     for (const chunk of chunks) {
       this.batchUpdateOptimized(chunk);
-      
+
       // 다음 청크 처리 전 잠시 대기 (UI 블로킹 방지)
       await new Promise(resolve => setTimeout(resolve, 1));
     }
@@ -543,7 +599,7 @@ export class SilentUpdateService {
 
   /**
    * 요소 존재 여부 확인
-   * 
+   *
    * @param elementId 요소 ID
    * @returns 존재 여부
    */
@@ -553,7 +609,7 @@ export class SilentUpdateService {
 
   /**
    * 모든 요소 ID 목록 반환
-   * 
+   *
    * @returns 요소 ID 배열
    */
   getAllElementIds(): string[] {
@@ -563,7 +619,7 @@ export class SilentUpdateService {
 
   /**
    * 요소 타입별 개수 반환
-   * 
+   *
    * @returns 타입별 개수 객체
    */
   getElementCountByType(): { [type: string]: number } {
@@ -598,7 +654,7 @@ export class SilentUpdateService {
     return {
       elementCount: this.getAllElementIds().length,
       isRenderingSuspended: this.isRenderingSuspended(),
-      elementTypes: this.getElementCountByType()
+      elementTypes: this.getElementCountByType(),
     };
   }
 }
@@ -608,5 +664,5 @@ export class SilentUpdateService {
  */
 export const SilentUpdateServiceModule = {
   __init__: ['silentUpdateService'],
-  silentUpdateService: ['type', SilentUpdateService]
+  silentUpdateService: ['type', SilentUpdateService],
 };

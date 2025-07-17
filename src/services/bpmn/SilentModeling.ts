@@ -24,7 +24,7 @@ interface Canvas {
 interface ElementRegistry {
   get(id: string): any;
   getGraphics(element: any): any;
-  _elements: { [key: string]: { element: any, gfx: any } };
+  _elements: { [key: string]: { element: any; gfx: any } };
 }
 
 interface GraphicsFactory {
@@ -73,7 +73,7 @@ export class SilentModeling {
   updatePropertiesSilently(element: any, properties: any): void {
     // BusinessObject 직접 수정
     Object.assign(element.businessObject, properties);
-    
+
     // 그래픽스 업데이트 (이벤트 없음)
     this.updateGraphicsSilently(element);
   }
@@ -81,29 +81,33 @@ export class SilentModeling {
   /**
    * 요소 위치를 Silent하게 이동
    */
-  moveElementSilently(element: any, delta: {x: number, y: number}): void {
+  moveElementSilently(element: any, delta: { x: number; y: number }): void {
     element.x += delta.x;
     element.y += delta.y;
-    
+
     this.updateGraphicsSilently(element);
   }
 
   /**
    * 요소를 Silent하게 생성
    */
-  createElementSilently(elementData: any, position: {x: number, y: number}, parent?: any): any {
+  createElementSilently(
+    elementData: any,
+    position: { x: number; y: number },
+    parent?: any
+  ): any {
     const element = this.elementFactory.createShape({
       type: elementData.type,
       businessObject: elementData.businessObject,
       x: position.x,
       y: position.y,
       width: elementData.width || 100,
-      height: elementData.height || 80
+      height: elementData.height || 80,
     });
 
     // Canvas에 직접 추가 (이벤트 없음)
     this.addElementToCanvasSilently(element, parent);
-    
+
     return element;
   }
 
@@ -126,12 +130,12 @@ export class SilentModeling {
       target: target,
       waypoints: connectionData.waypoints || [
         { x: source.x + source.width / 2, y: source.y + source.height / 2 },
-        { x: target.x + target.width / 2, y: target.y + target.height / 2 }
-      ]
+        { x: target.x + target.width / 2, y: target.y + target.height / 2 },
+      ],
     });
 
     this.addElementToCanvasSilently(connection, this.canvas.getRootElement());
-    
+
     return connection;
   }
 
@@ -151,15 +155,15 @@ export class SilentModeling {
    */
   private addElementToCanvasSilently(element: any, parent?: any): void {
     const targetParent = parent || this.canvas.getRootElement();
-    
+
     // Canvas 내부 메서드 직접 호출 (이벤트 없음)
     (this.canvas as any)._addElement(element, targetParent);
-    
+
     // ElementRegistry에 등록
     const gfx = this.graphicsFactory.create('shape', element);
     (this.elementRegistry as any)._elements[element.id] = {
       element: element,
-      gfx: gfx
+      gfx: gfx,
     };
   }
 
@@ -169,7 +173,7 @@ export class SilentModeling {
   private removeElementFromCanvasSilently(element: any): void {
     // Canvas 내부 메서드 직접 호출 (이벤트 없음)
     (this.canvas as any)._removeElement(element);
-    
+
     // ElementRegistry에서 제거
     delete (this.elementRegistry as any)._elements[element.id];
   }
@@ -177,14 +181,16 @@ export class SilentModeling {
   /**
    * 배치 업데이트 실행 (성능 최적화)
    */
-  executeBatchUpdatesSilently(updates: Array<{
-    type: 'update' | 'move' | 'create' | 'remove',
-    element?: any,
-    data?: any
-  }>): void {
+  executeBatchUpdatesSilently(
+    updates: Array<{
+      type: 'update' | 'move' | 'create' | 'remove';
+      element?: any;
+      data?: any;
+    }>
+  ): void {
     // 렌더링 일시 중단
     this.suspendRendering();
-    
+
     try {
       updates.forEach(update => {
         switch (update.type) {
@@ -195,7 +201,11 @@ export class SilentModeling {
             this.moveElementSilently(update.element, update.data);
             break;
           case 'create':
-            this.createElementSilently(update.data.elementData, update.data.position, update.data.parent);
+            this.createElementSilently(
+              update.data.elementData,
+              update.data.position,
+              update.data.parent
+            );
             break;
           case 'remove':
             this.removeElementSilently(update.element);
@@ -229,5 +239,5 @@ export class SilentModeling {
  */
 export const SilentModelingModule = {
   __init__: ['silentModeling'],
-  silentModeling: ['type', SilentModeling]
+  silentModeling: ['type', SilentModeling],
 };

@@ -73,7 +73,7 @@ describe('SilentModeling', () => {
     test('should update element properties without events', () => {
       const mockElement = {
         id: 'element1',
-        businessObject: { name: 'old name' }
+        businessObject: { name: 'old name' },
       };
 
       const newProperties = { name: 'new name', type: 'task' };
@@ -84,21 +84,27 @@ describe('SilentModeling', () => {
 
       expect(mockElement.businessObject).toEqual({
         name: 'new name',
-        type: 'task'
+        type: 'task',
       });
-      expect(mockGraphicsFactory.update).toHaveBeenCalledWith('shape', mockElement, 'mock-graphics');
+      expect(mockGraphicsFactory.update).toHaveBeenCalledWith(
+        'shape',
+        mockElement,
+        'mock-graphics'
+      );
     });
 
     test('should handle missing graphics gracefully', () => {
       const mockElement = {
         id: 'element1',
-        businessObject: { name: 'old name' }
+        businessObject: { name: 'old name' },
       };
 
       mockElementRegistry.getGraphics.mockReturnValue(null);
 
       expect(() => {
-        silentModeling.updatePropertiesSilently(mockElement, { name: 'new name' });
+        silentModeling.updatePropertiesSilently(mockElement, {
+          name: 'new name',
+        });
       }).not.toThrow();
 
       expect(mockElement.businessObject.name).toBe('new name');
@@ -111,7 +117,7 @@ describe('SilentModeling', () => {
       const mockElement = {
         id: 'element1',
         x: 100,
-        y: 200
+        y: 200,
       };
 
       const delta = { x: 50, y: -30 };
@@ -122,7 +128,11 @@ describe('SilentModeling', () => {
 
       expect(mockElement.x).toBe(150);
       expect(mockElement.y).toBe(170);
-      expect(mockGraphicsFactory.update).toHaveBeenCalledWith('shape', mockElement, 'mock-graphics');
+      expect(mockGraphicsFactory.update).toHaveBeenCalledWith(
+        'shape',
+        mockElement,
+        'mock-graphics'
+      );
     });
   });
 
@@ -132,7 +142,7 @@ describe('SilentModeling', () => {
         type: 'bpmn:Task',
         businessObject: { id: 'task1', name: 'Test Task' },
         width: 100,
-        height: 80
+        height: 80,
       };
 
       const position = { x: 200, y: 300 };
@@ -143,12 +153,15 @@ describe('SilentModeling', () => {
         x: 200,
         y: 300,
         width: 100,
-        height: 80
+        height: 80,
       };
 
       mockElementFactory.createShape.mockReturnValue(mockCreatedElement);
 
-      const result = silentModeling.createElementSilently(elementData, position);
+      const result = silentModeling.createElementSilently(
+        elementData,
+        position
+      );
 
       expect(mockElementFactory.createShape).toHaveBeenCalledWith({
         type: 'bpmn:Task',
@@ -156,14 +169,19 @@ describe('SilentModeling', () => {
         x: 200,
         y: 300,
         width: 100,
-        height: 80
+        height: 80,
       });
 
-      expect(mockCanvas._addElement).toHaveBeenCalledWith(mockCreatedElement, { id: 'root' });
-      expect(mockGraphicsFactory.create).toHaveBeenCalledWith('shape', mockCreatedElement);
+      expect(mockCanvas._addElement).toHaveBeenCalledWith(mockCreatedElement, {
+        id: 'root',
+      });
+      expect(mockGraphicsFactory.create).toHaveBeenCalledWith(
+        'shape',
+        mockCreatedElement
+      );
       expect(mockElementRegistry._elements['task1']).toEqual({
         element: mockCreatedElement,
-        gfx: 'mock-graphics'
+        gfx: 'mock-graphics',
       });
       expect(result).toBe(mockCreatedElement);
     });
@@ -171,7 +189,7 @@ describe('SilentModeling', () => {
     test('should use default dimensions if not provided', () => {
       const elementData = {
         type: 'bpmn:Task',
-        businessObject: { id: 'task1' }
+        businessObject: { id: 'task1' },
       };
 
       const position = { x: 200, y: 300 };
@@ -186,7 +204,7 @@ describe('SilentModeling', () => {
         x: 200,
         y: 300,
         width: 100,
-        height: 80
+        height: 80,
       });
     });
   });
@@ -197,7 +215,7 @@ describe('SilentModeling', () => {
 
       mockElementRegistry._elements['element1'] = {
         element: mockElement,
-        gfx: 'mock-graphics'
+        gfx: 'mock-graphics',
       };
 
       silentModeling.removeElementSilently(mockElement);
@@ -211,7 +229,7 @@ describe('SilentModeling', () => {
     test('should create connection without events', () => {
       const connectionData = {
         type: 'bpmn:SequenceFlow',
-        businessObject: { id: 'flow1' }
+        businessObject: { id: 'flow1' },
       };
 
       const source = { id: 'source', x: 100, y: 100, width: 100, height: 80 };
@@ -221,12 +239,16 @@ describe('SilentModeling', () => {
         id: 'flow1',
         type: 'bpmn:SequenceFlow',
         source: source,
-        target: target
+        target: target,
       };
 
       mockElementFactory.createConnection.mockReturnValue(mockConnection);
 
-      const result = silentModeling.createConnectionSilently(connectionData, source, target);
+      const result = silentModeling.createConnectionSilently(
+        connectionData,
+        source,
+        target
+      );
 
       expect(mockElementFactory.createConnection).toHaveBeenCalledWith({
         type: 'bpmn:SequenceFlow',
@@ -235,11 +257,13 @@ describe('SilentModeling', () => {
         target: target,
         waypoints: [
           { x: 150, y: 140 }, // source center
-          { x: 350, y: 240 }  // target center
-        ]
+          { x: 350, y: 240 }, // target center
+        ],
       });
 
-      expect(mockCanvas._addElement).toHaveBeenCalledWith(mockConnection, { id: 'root' });
+      expect(mockCanvas._addElement).toHaveBeenCalledWith(mockConnection, {
+        id: 'root',
+      });
       expect(result).toBe(mockConnection);
     });
 
@@ -247,7 +271,11 @@ describe('SilentModeling', () => {
       const connectionData = {
         type: 'bpmn:SequenceFlow',
         businessObject: { id: 'flow1' },
-        waypoints: [{ x: 100, y: 100 }, { x: 200, y: 150 }, { x: 300, y: 200 }]
+        waypoints: [
+          { x: 100, y: 100 },
+          { x: 200, y: 150 },
+          { x: 300, y: 200 },
+        ],
       };
 
       const source = { id: 'source' };
@@ -259,7 +287,11 @@ describe('SilentModeling', () => {
 
       expect(mockElementFactory.createConnection).toHaveBeenCalledWith(
         expect.objectContaining({
-          waypoints: [{ x: 100, y: 100 }, { x: 200, y: 150 }, { x: 300, y: 200 }]
+          waypoints: [
+            { x: 100, y: 100 },
+            { x: 200, y: 150 },
+            { x: 300, y: 200 },
+          ],
         })
       );
     });
@@ -271,13 +303,13 @@ describe('SilentModeling', () => {
         {
           type: 'update' as const,
           element: { id: 'element1', businessObject: {} },
-          data: { name: 'updated' }
+          data: { name: 'updated' },
         },
         {
           type: 'move' as const,
           element: { id: 'element2', x: 100, y: 100 },
-          data: { x: 10, y: 20 }
-        }
+          data: { x: 10, y: 20 },
+        },
       ];
 
       mockElementRegistry.getGraphics.mockReturnValue('mock-graphics');
@@ -296,8 +328,8 @@ describe('SilentModeling', () => {
         {
           type: 'update' as const,
           element: null, // This will cause an error
-          data: { name: 'updated' }
-        }
+          data: { name: 'updated' },
+        },
       ];
 
       expect(() => {

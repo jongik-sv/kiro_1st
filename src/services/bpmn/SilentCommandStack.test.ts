@@ -43,16 +43,19 @@ describe('SilentCommandStack', () => {
       return originalFire(event, data);
     });
 
-    silentCommandStack = new SilentCommandStack(mockEventBus as any, mockInjector);
+    silentCommandStack = new SilentCommandStack(
+      mockEventBus as any,
+      mockInjector
+    );
   });
 
   describe('Silent Mode', () => {
     test('setSilentMode should enable/disable silent mode', () => {
       expect((silentCommandStack as any)._silentMode).toBe(false);
-      
+
       silentCommandStack.setSilentMode(true);
       expect((silentCommandStack as any)._silentMode).toBe(true);
-      
+
       silentCommandStack.setSilentMode(false);
       expect((silentCommandStack as any)._silentMode).toBe(false);
     });
@@ -61,9 +64,9 @@ describe('SilentCommandStack', () => {
       // Normal mode - events should fire
       (silentCommandStack as any).fire('test.event', {});
       expect(eventsFired).toContain('test.event');
-      
+
       eventsFired.length = 0; // Clear events
-      
+
       // Silent mode - events should not fire
       silentCommandStack.setSilentMode(true);
       (silentCommandStack as any).fire('test.event', {});
@@ -78,10 +81,12 @@ describe('SilentCommandStack', () => {
       (silentCommandStack as any).execute = mockExecute;
 
       expect((silentCommandStack as any)._silentMode).toBe(false);
-      
+
       silentCommandStack.executeSilently('test.command', { data: 'test' });
-      
-      expect(mockExecute).toHaveBeenCalledWith('test.command', { data: 'test' });
+
+      expect(mockExecute).toHaveBeenCalledWith('test.command', {
+        data: 'test',
+      });
       expect((silentCommandStack as any)._silentMode).toBe(false); // Should restore original state
     });
 
@@ -92,10 +97,12 @@ describe('SilentCommandStack', () => {
 
       silentCommandStack.setSilentMode(true);
       expect((silentCommandStack as any)._silentMode).toBe(true);
-      
+
       silentCommandStack.executeSilently('test.command', { data: 'test' });
-      
-      expect(mockExecute).toHaveBeenCalledWith('test.command', { data: 'test' });
+
+      expect(mockExecute).toHaveBeenCalledWith('test.command', {
+        data: 'test',
+      });
       expect((silentCommandStack as any)._silentMode).toBe(true); // Should preserve silent mode
     });
 
@@ -107,14 +114,18 @@ describe('SilentCommandStack', () => {
       const commands = [
         { command: 'command1', context: { data: 'test1' } },
         { command: 'command2', context: { data: 'test2' } },
-        { command: 'command3' }
+        { command: 'command3' },
       ];
 
       const results = silentCommandStack.executeBatchSilently(commands);
 
       expect(mockExecute).toHaveBeenCalledTimes(3);
-      expect(mockExecute).toHaveBeenNthCalledWith(1, 'command1', { data: 'test1' });
-      expect(mockExecute).toHaveBeenNthCalledWith(2, 'command2', { data: 'test2' });
+      expect(mockExecute).toHaveBeenNthCalledWith(1, 'command1', {
+        data: 'test1',
+      });
+      expect(mockExecute).toHaveBeenNthCalledWith(2, 'command2', {
+        data: 'test2',
+      });
       expect(mockExecute).toHaveBeenNthCalledWith(3, 'command3', undefined);
       expect(results).toEqual(['result', 'result', 'result']);
       expect((silentCommandStack as any)._silentMode).toBe(false); // Should restore original state
@@ -130,30 +141,30 @@ describe('SilentCommandStack', () => {
       (silentCommandStack as any).execute = mockExecute;
 
       expect((silentCommandStack as any)._silentMode).toBe(false);
-      
+
       expect(() => {
         silentCommandStack.executeSilently('test.command');
       }).toThrow('Test error');
-      
+
       expect((silentCommandStack as any)._silentMode).toBe(false); // Should restore original state
     });
 
     test('executeBatchSilently should restore silent mode even if execution throws', () => {
       // Mock execute method to throw error on second command
-      const mockExecute = jest.fn()
+      const mockExecute = jest
+        .fn()
         .mockReturnValueOnce('result1')
-        .mockImplementationOnce(() => { throw new Error('Test error'); });
+        .mockImplementationOnce(() => {
+          throw new Error('Test error');
+        });
       (silentCommandStack as any).execute = mockExecute;
 
-      const commands = [
-        { command: 'command1' },
-        { command: 'command2' }
-      ];
+      const commands = [{ command: 'command1' }, { command: 'command2' }];
 
       expect(() => {
         silentCommandStack.executeBatchSilently(commands);
       }).toThrow('Test error');
-      
+
       expect((silentCommandStack as any)._silentMode).toBe(false); // Should restore original state
     });
   });

@@ -45,12 +45,14 @@ export class SilentCommandStack {
       throw new Error(`No handler registered for command: ${command}`);
     }
 
-    const result = handler.execute ? handler.execute(context) : handler(context);
-    
+    const result = handler.execute
+      ? handler.execute(context)
+      : handler(context);
+
     if (!this._silentMode) {
       this.fire('commandStack.changed', { command, context, result });
     }
-    
+
     return result;
   }
 
@@ -70,7 +72,7 @@ export class SilentCommandStack {
   executeSilently(command: string, context?: any): any {
     const wasSilent = this._silentMode;
     this._silentMode = true;
-    
+
     try {
       return this.execute(command, context);
     } finally {
@@ -81,12 +83,16 @@ export class SilentCommandStack {
   /**
    * Silent 모드에서 여러 명령을 배치 실행
    */
-  executeBatchSilently(commands: Array<{command: string, context?: any}>): any[] {
+  executeBatchSilently(
+    commands: Array<{ command: string; context?: any }>
+  ): any[] {
     const wasSilent = this._silentMode;
     this._silentMode = true;
-    
+
     try {
-      return commands.map(({command, context}) => this.execute(command, context));
+      return commands.map(({ command, context }) =>
+        this.execute(command, context)
+      );
     } finally {
       this._silentMode = wasSilent;
     }
@@ -98,5 +104,5 @@ export class SilentCommandStack {
  */
 export const SilentCommandStackModule = {
   __init__: ['silentCommandStack'],
-  silentCommandStack: ['type', SilentCommandStack]
+  silentCommandStack: ['type', SilentCommandStack],
 };
